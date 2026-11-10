@@ -123,6 +123,8 @@ input[type=range]{width:100%;accent-color:var(--yellow)}
 .nope b{display:block;font-size:15.5px}
 .nope span{color:var(--muted)}
 .nope b.x{color:var(--red)}
+.cur b{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.cur i{font-style:normal;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:3px 9px;border-radius:99px;white-space:nowrap;flex:none}
 .me-cta{background:var(--yellow);color:var(--on-yellow);border-radius:18px;padding:20px;display:flex;flex-direction:column;gap:12px}
 .me-cta .who{display:flex;gap:12px;align-items:center}
 .me-cta img{width:56px;height:56px;border-radius:50%;object-fit:cover;border:2px solid var(--on-yellow);flex:none}
@@ -435,23 +437,31 @@ const Q = [
  {id:"w",sec:"Sobre ti",q:"¿Cuánto pesas?",hint:"Lo uso para calcular tus dosis exactas.",type:"weight"},
 
  {id:"days",sec:"Tu entreno",q:"¿Cuántos días entrenas a la semana?",opts:[["0","Ahora mismo ninguno"],["1-2","1 o 2 días"],["3-4","3 o 4 días"],["5+","5 o más días"]]},
- {id:"dur",sec:"Tu entreno",q:"¿Cuánto dura normalmente tu entreno?",when:trains,opts:[["corto","Menos de 1 hora"],["medio","De 1 hora a hora y media"],["largo","Más de hora y media"]]},
+ {id:"tipo",sec:"Tu entreno",q:"¿Qué haces sobre todo?",when:a=>trains(a)&&(a.goal==="salud"||a.goal==="grasa"),opts:[["pesas","Pesas o fuerza"],["cardio","Cardio","Correr, bici, clases…"],["ambos","Las dos cosas"]]},
+ {id:"evt",sec:"Tu entreno",q:"¿Cuánto duran tus pruebas o tus entrenos más importantes?",when:a=>trains(a)&&a.goal==="resistencia",opts:[["corto","Menos de 10 minutos","Pista, remo, sprints"],["medio","De 10 a 60 minutos","5 o 10 km, ciclismo corto"],["largo","De 1 a 2 horas","Media maratón, ciclismo"],["ultra","Más de 2 horas","Maratón, trail, ciclismo largo"]]},
+ {id:"dur",sec:"Tu entreno",q:"¿Cuánto dura normalmente tu entreno?",when:a=>trains(a)&&a.goal!=="resistencia",opts:[["corto","Menos de 1 hora"],["medio","De 1 hora a hora y media"],["largo","Más de hora y media"]]},
+ {id:"compite",sec:"Tu entreno",q:a=>a.goal==="equipo"?"¿Juegas partidos o competiciones?":"¿Compites?",when:a=>trains(a)&&(a.goal==="resistencia"||a.goal==="equipo"),opts:[["si","Sí"],["no","No, entreno por mí"]]},
  {id:"energy",sec:"Tu entreno",q:"¿Cómo llegas a tus entrenos?",when:trains,opts:[["ok","Con energía"],["cuesta","Me cuesta arrancar"],["nada","Sin fuerzas casi siempre"]]},
+ {id:"why",sec:"Tu entreno",q:"¿Por qué crees que te pasa?",hint:"Marca todo lo que encaje.",type:"multi",when:a=>trains(a)&&(a.energy==="cuesta"||a.energy==="nada"),opts:[
+   ["sueno","Duermo poco o mal"],["sincomer","Entreno sin haber comido"],["horario","Entreno muy temprano o al salir de trabajar"],["nada","No lo sé"]]},
  {id:"recov",sec:"Tu entreno",q:"¿Cómo te recuperas?",hint:"Marca todo lo que te pase.",type:"multi",when:trains,opts:[
    ["cargado","Me quedo muy cargado o con agujetas fuertes"],["calambres","Me dan calambres"],["resfriados","Me pongo malo a menudo cuando entreno duro"],["nada","Bien, sin problemas"]]},
  {id:"injury",sec:"Tu entreno",q:"¿Te sueles lesionar o tener molestias?",hint:"Marca todo lo que te pase.",type:"multi",opts:[
    ["tendon","Tendones","Codo, rodilla, hombro, Aquiles…"],["artic","Articulaciones","Rodilla, cadera, artrosis"],["hueso","Huesos","Fracturas por estrés"],["musculo","Músculos","Roturas, tirones, contracturas"],["ahora","Ahora mismo estoy lesionado"],["nada","No me suelo lesionar"]]},
+ {id:"rehab",sec:"Tu entreno",q:"¿Haces ejercicios de fuerza o de rehabilitación para esa zona?",when:a=>(a.injury||[]).some(x=>x!=="nada"),opts:[["si","Sí"],["no","No"]]},
 
  {id:"diet",sec:"Tu alimentación",q:"¿Cómo comes?",opts:[["omni","De todo"],["veget","Vegetariano","Sin carne ni pescado"],["vegan","Vegano","Nada de origen animal"]]},
  {id:"prot",sec:"Tu alimentación",q:"¿Comes proteína en casi todas tus comidas?",hint:"Carne, pescado, huevos, lácteos, legumbres o tofu.",opts:[["si","Sí, en casi todas"],["algunas","En algunas"],["no","Casi nunca"]]},
  {id:"fish",sec:"Tu alimentación",q:"¿Comes pescado azul 2 veces por semana?",hint:"Salmón, sardinas, caballa, atún, boquerones…",when:a=>a.diet!=="vegan"&&a.diet!=="veget",opts:[["si","Sí"],["no","No"]]},
  {id:"dairy",sec:"Tu alimentación",q:"¿Tomas lácteos cada día?",hint:"Leche, yogur, queso, o bebida vegetal con calcio.",opts:[["si","Sí, 2 o más al día"],["poco","1 al día o menos"],["no","No tomo"]]},
  {id:"veg",sec:"Tu alimentación",q:"¿Comes fruta y verdura todos los días?",opts:[["si","Sí, varias veces al día"],["aveces","Algunos días"],["no","Casi nunca"]]},
+ {id:"coffee",sec:"Tu alimentación",q:"¿Cuánto café tomas al día?",when:a=>a.age!=="menor",opts:[["0","No tomo"],["1-2","1 o 2"],["3+","3 o más"],["energ","Bebidas energéticas o pre-entreno a diario"]]},
  {id:"hunger",sec:"Tu alimentación",q:"¿Tienes mucha hambre o picas entre horas?",when:a=>a.goal==="grasa",opts:[["si","Sí, me cuesta controlarlo"],["no","No, lo llevo bien"]]},
  {id:"appetite",sec:"Tu alimentación",q:"¿Te llenas enseguida al comer?",when:a=>a.goal==="peso",opts:[["si","Sí, me cuesta comer mucho"],["no","No, como bien"]]},
 
  {id:"sun",sec:"Tu salud",q:"¿Te da el sol casi todos los días?",hint:"Al menos 15–20 minutos en cara y brazos.",opts:[["si","Sí"],["no","No, paso mucho tiempo dentro"]]},
  {id:"sleep",sec:"Tu salud",q:"¿Cómo duermes?",opts:[["bien","Bien"],["dormirse","Me cuesta dormirme"],["despierto","Me despierto mucho por la noche"],["poco","Duermo menos de 6 horas"],["turnos","Trabajo a turnos o viajo con jet lag"]]},
+ {id:"late",sec:"Tu salud",q:"¿Tomas café, té o bebidas energéticas a partir de las 4 de la tarde?",when:a=>a.sleep&&a.sleep!=="bien"&&a.age!=="menor"&&a.coffee!=="0",opts:[["si","Sí"],["no","No"]]},
  {id:"stress",sec:"Tu salud",q:"¿Cómo vas de estrés?",opts:[["bajo","Tranquilo"],["medio","Normal"],["alto","Mucho estrés o ansiedad"]]},
  {id:"period",sec:"Tu salud",q:"¿Cómo va tu regla?",hint:"Marca todo lo que te pase.",type:"multi",when:a=>a.sex==="m"&&a.age!=="menor",opts:[
    ["dolor","Me duele mucho"],["abundante","Es muy abundante"],["spm","Síndrome premenstrual fuerte","Hinchazón, cambios de ánimo, antojos"],["irregular","Irregular o se me ha retirado"],["sop","Tengo SOP (ovario poliquístico)"],["meno","Estoy en la menopausia"],["embarazo","Estoy embarazada o dando el pecho"],["nada","Normal, sin problemas"]]},
@@ -459,9 +469,12 @@ const Q = [
    ["dolor","Me duele mucho"],["abundante","Es muy abundante"],["irregular","Irregular o se me ha retirado"],["nada","Normal, sin problemas"]]},
  {id:"issues",sec:"Tu salud",q:"¿Te pasa algo de esto?",hint:"Marca todo lo que te pase.",type:"multi",opts:[
    ["fatiga","Estoy cansado casi siempre"],["resfriados","Me resfrío a menudo"],["digest","Hinchazón o digestiones pesadas"],["estren","Voy mal al baño (estreñimiento)"],["foco","Me cuesta concentrarme"],["pelo","Se me cae el pelo más de lo normal"],["colesterol","Tengo el colesterol o los triglicéridos altos"],["nada","Nada de esto"]]},
+ {id:"milk",sec:"Tu salud",q:"¿Te sienta mal la leche?",hint:"Hinchazón, gases o diarrea después de tomarla.",when:a=>(a.issues||[]).includes("digest")&&a.diet!=="vegan",opts:[["si","Sí"],["no","No"],["nose","No lo sé"]]},
  {id:"health",sec:"Tu salud",q:"¿Tienes algo de esto?",hint:"Importante: cambia lo que te puedo recomendar.",type:"multi",opts:[
    ["hta","Tensión alta o algo del corazón"],["renal","Problema de riñón"],["higado","Problema de hígado"],["tiroides","Problema de tiroides"],["diabetes","Diabetes"],["med","Tomo medicación a diario"],["antidoping","Compito y me pueden hacer control antidopaje"],["nada","Nada de esto"]]},
 
+ {id:"current",sec:"Para terminar",q:"¿Qué suplementos tomas ahora?",hint:"Marca todos. Te diré cuáles te sirven y cuáles no.",type:"multi",opts:[
+   ["proteina","Proteína en polvo"],["creatina","Creatina"],["preentreno","Pre-entreno"],["cafeina","Cápsulas de cafeína"],["bcaa","BCAA o aminoácidos"],["glutamina","Glutamina"],["quemagrasas","Quemagrasas o L-carnitina"],["multi","Multivitamínico"],["omega3","Omega-3"],["vitd","Vitamina D"],["magnesio","Magnesio"],["colageno","Colágeno"],["ashwagandha","Ashwagandha"],["melatonina","Melatonina"],["testo","Potenciador de testosterona"],["otros","Otros"],["nada","Ninguno"]]},
  {id:"budget",sec:"Para terminar",q:"¿Cuánto quieres gastarte?",opts:[["min","Lo mínimo","Solo lo imprescindible"],["normal","Lo normal","Lo que funciona y algún extra"],["max","Lo que haga falta","Todo lo que me pueda ayudar"]]}
 ];
 
@@ -499,12 +512,13 @@ function evaluate(a){
   else if(preg) add("creatina","avoid","No hay estudios suficientes en embarazo o lactancia.");
   else if(g==="musculo") add("creatina","take","Ganas más fuerza y más músculo que entrenando sin ella.");
   else if(g==="peso") add("creatina","take","Además de fuerza, te suma 1–2 kg de agua dentro del músculo. Un buen empujón para tu objetivo.");
+  else if(g==="grasa"&&a.tipo==="cardio") add("creatina","opt","Si solo haces cardio, ayuda poco. Si añades pesas, te ayudará a no perder músculo mientras bajas.");
   else if(g==="grasa") add("creatina","take","Te ayuda a no perder músculo ni fuerza mientras bajas. Ojo: la báscula puede subir 1–2 kg de agua en el músculo, y eso no es grasa.");
   else if(g==="equipo") add("creatina","take","Mejora los sprints y los esfuerzos repetidos.");
   else if(g==="resistencia") add("creatina","opt","Útil para los cambios de ritmo y el gimnasio, pero suma 1–2 kg de agua que pueden pesarte corriendo.");
   else if((mayor||meno)&&tr) add("creatina","take",meno?"En la menopausia, junto al entrenamiento de fuerza, ayuda a mantener músculo y fuerza.":"Junto al entrenamiento de fuerza, te ayuda a no perder músculo con la edad.");
   else if(lesion) add("creatina","opt","Puede ayudarte a perder menos músculo mientras estás parado. La evidencia es mixta.");
-  else if(tr) add("creatina","opt","Si entrenas fuerza, te da un extra de fuerza y músculo.");
+  else if(tr&&a.tipo!=="cardio") add("creatina","opt","Como haces pesas, te da un extra de fuerza y músculo.");
 
   /* Ganar peso */
   if(g==="peso") add("batido","take",a.appetite==="si"?"Te llenas enseguida, así que beber calorías es tu mejor arma: 800 kcal en un vaso.":"Beber 800 kcal extra es lo más fácil para subir. Hace lo mismo que un «gainer» y cuesta mucho menos.");
@@ -514,10 +528,19 @@ function evaluate(a){
   const cafDose=n=>`${n} mg (≈${Math.max(1,Math.round(n/80))} ${Math.round(n/80)>1?"cafés solos":"café solo"}), 30–60 min antes de entrenar`;
   const lowCaf = hta||sleepBad||stressHi;
   const lowE = tr&&(a.energy==="cuesta"||a.energy==="nada");
+  const why=a.why||[], fixFirst=why.includes("sueno")||why.includes("sincomer");
+  const muchoCafe = a.coffee==="3+"||a.coffee==="energ";
+  const usesCaf = tr&&(lowE||["musculo","resistencia","equipo","grasa","peso"].includes(g));
   if(minor){ if(tr) add("cafeina","avoid","No se recomienda para entrenar con menos de 18."); }
   else if(preg) add("cafeina","avoid","Máximo 200 mg al día de todo (unos 2 cafés). Nada de dosis para entrenar.");
+  else if(usesCaf&&muchoCafe&&hta) add("cafeina","avoid",a.coffee==="energ"?"Con la tensión alta, deja las bebidas energéticas y los pre-entreno diarios. Coméntalo con tu médico.":"Ya tomas mucho café y tienes la tensión alta: no sumes más cafeína para entrenar.");
+  else if(usesCaf&&muchoCafe) add("cafeina","take",a.coffee==="energ"?"Ya tomas bebidas energéticas o pre-entreno cada día: no sumes más. Para que te ayude de verdad, tómalo solo 30–60 min antes de entrenar y quita el resto del día.":"Ya tomas 3 cafés o más, así que no necesitas más cafeína. Mueve uno de esos cafés a 30–60 min antes de entrenar"+(sleepBad?" y quita los de la tarde.":"."),"No añadas más: usa uno de tus cafés de siempre antes de entrenar");
   else if(lowE&&hta) add("cafeina","opt","Te cuesta arrancar, pero con la tensión alta nada de pre-entrenos. Como mucho un café, y coméntalo con tu médico.",cafDose(Math.min(mgLo,100)));
-  else if(lowE) add("preok","take",(a.energy==="nada"?"Llegas sin fuerzas: te ayudará a arrancar, pero revisa también lo de abajo (sueño, comida y analítica). ":"Para arrancar con ganas. ")+(lowCaf?"En tu caso, dosis baja y nunca por la tarde.":""),cafDose(lowCaf?mgLo:mg)+(lowCaf?"":". Si usas pre-entreno, con 6–8 g de citrulina"));
+  else if(lowE) add("preok",fixFirst?"opt":"take",
+    (fixFirst?"Primero arregla lo que me has dicho ("+[why.includes("sueno")?"dormir más":"",why.includes("sincomer")?"comer algo 1–3 h antes":""].filter(Boolean).join(" y ")+"). Si aun así te cuesta, esto te ayuda a arrancar. ":a.energy==="nada"?"Llegas sin fuerzas: te ayudará a arrancar, pero revisa también la analítica de abajo. ":"Para arrancar con ganas. ")
+    +(why.includes("horario")?"Si entrenas por la tarde, que sea antes de las 17:00 o no dormirás bien. ":"")
+    +(lowCaf?"En tu caso, dosis baja y nunca por la tarde.":""),
+    cafDose(lowCaf?mgLo:mg)+(lowCaf?"":". Si usas pre-entreno, con 6–8 g de citrulina"));
   else if(!tr||g==="salud") {}
   else if(lowCaf) add("cafeina","opt","Funciona, pero en tu caso usa dosis bajas y nunca por la tarde."+(hta?" Con la tensión alta, coméntalo con tu médico.":""),cafDose(mgLo));
   else if(g==="peso") add("cafeina","opt","Te da energía para entrenar, pero quita el hambre. Si te cuesta comer, úsala con cuidado.",cafDose(mgLo));
@@ -525,14 +548,29 @@ function evaluate(a){
   else add("cafeina","take","Entrenas con más energía y rindes más.",cafDose(mg));
 
   /* Entrenos largos y deportes */
-  if(tr&&a.dur==="largo") add("carbo","take","Tus entrenos pasan de hora y media: es lo que más mejora tu rendimiento.");
-  else if(tr&&a.dur==="medio"&&(g==="resistencia"||g==="equipo")) add("carbo","opt","Solo en los entrenos o partidos que pasen de 75–90 minutos.");
-  if(H("recov","calambres")) add("electrolitos","opt","Para los calambres en entrenos largos o con calor. Si te dan en sesiones cortas, suele ser fatiga: estira el músculo y baja un poco el ritmo.");
-  else if(tr&&a.dur==="largo"&&(g==="resistencia"||g==="equipo")) add("electrolitos","opt","En entrenos largos o con calor, repón la sal que pierdes sudando.");
-  if((g==="resistencia"||g==="equipo")&&tr&&!minor){
-    if(preg) add("nitrato","avoid","No hay estudios suficientes en embarazo.");
-    else add("nitrato","opt","Mejora un poco la resistencia si no eres atleta de élite. Úsalo en competiciones o entrenos clave."+(hta?" Baja la tensión: ojo si tomas pastillas para ella.":""));
-    if(!preg) add("betaalanina","opt",g==="equipo"?"Aguantas mejor los esfuerzos muy intensos repetidos. Funciona tras 4 semanas tomándola cada día.":"Solo si tu prueba tiene tramos muy intensos de 1 a 10 minutos. Para fondo largo no sirve.");
+  const longS=(g==="resistencia"&&(a.evt==="largo"||a.evt==="ultra"))||(g!=="resistencia"&&a.dur==="largo");
+  const comp=a.compite==="si", htaN=hta?" Baja la tensión: ojo si tomas pastillas para ella.":"";
+  if(tr&&longS) add("carbo","take",g==="resistencia"?(a.evt==="ultra"?"En pruebas de más de 2 horas es lo que más mejora tu rendimiento. Entrena el estómago para llegar a 60–90 g por hora.":"En esfuerzos de más de una hora es lo que más mejora tu rendimiento."):"Tus entrenos pasan de hora y media: es lo que más mejora tu rendimiento.");
+  else if(tr&&g==="equipo"&&(a.dur==="medio"||comp)) add("carbo","opt","En partidos o sesiones de más de 75–90 minutos.");
+  if(H("recov","calambres")) add("electrolitos",a.evt==="ultra"?"take":"opt","Para los calambres en entrenos largos o con calor. Si te dan en sesiones cortas, suele ser fatiga: estira el músculo y baja un poco el ritmo.");
+  else if(tr&&longS&&g!=="musculo") add("electrolitos",a.evt==="ultra"?"take":"opt","En esfuerzos largos o con calor, repón la sal que pierdes sudando.");
+  if(tr&&!minor&&!preg&&(g==="resistencia"||g==="equipo")){
+    const extra=comp||a.budget==="max";
+    if(g==="resistencia"){
+      if(a.evt==="corto"){
+        add("betaalanina",extra?"take":"opt","Tus esfuerzos duran menos de 10 minutos: justo donde mejor funciona. Necesita 4 semanas tomándola a diario.");
+        if(comp&&!hta&&!renal&&!H("issues","digest")) add("bicarbonato","opt","Para competiciones de 1 a 10 minutos. Pruébalo antes en entrenos: a mucha gente le sienta mal al estómago.");
+      } else if(a.evt==="medio"){
+        add("nitrato",extra?"take":"opt","En pruebas de 10 a 60 minutos es donde más se nota (1–3 %), sobre todo si no eres de élite."+htaN);
+        add("betaalanina","opt","Puede ayudarte en los cambios de ritmo y el sprint final.");
+      } else {
+        add("nitrato","opt","Puede ayudarte un poco en tus pruebas largas. Úsalo en competiciones."+htaN);
+        add("betaalanina","skip","En pruebas de más de una hora apenas sirve.");
+      }
+    } else {
+      add("betaalanina","opt","Aguantas mejor los sprints repetidos. Funciona tras 4 semanas tomándola a diario.");
+      if(comp) add("nitrato","opt","Puede ayudarte un poco a aguantar el partido. Tómalo 2–3 h antes."+htaN);
+    }
   }
   if(H("recov","cargado")){
     add("cereza","opt","Para las semanas más duras o antes de competir. Pero lo que más acelera tu recuperación es dormir y comer suficiente.");
@@ -540,7 +578,7 @@ function evaluate(a){
   if((g==="musculo"||g==="equipo")&&tr&&!minor&&!preg&&!lowE) add("citrulina","opt","Quizá alguna repetición más. Efecto pequeño: solo si ya tienes lo demás.");
 
   /* Lesiones */
-  if(H("injury","tendon")) add("colageno","opt","Tienes problemas de tendones: tómalo antes de tus ejercicios de fuerza o de rehabilitación. Evidencia preliminar, pero segura y barata.");
+  if(H("injury","tendon")) add("colageno","opt",a.rehab==="no"?"Solo funciona si lo tomas antes de ejercicios de carga para el tendón. Como no los haces, empieza por ahí (mejor con un fisio): sin ejercicio, el colágeno no hace nada.":"Tómalo 30–60 min antes de tus ejercicios de fuerza o de rehabilitación. Evidencia preliminar, pero segura y barata.");
   if(H("injury","artic")){
     if(liver||med||preg) add("curcumina","avoid","Para las articulaciones se usa la curcumina, pero con tu caso (hígado, medicación o embarazo) mejor no sin consultar.");
     else add("curcumina","opt","Puede aliviar un poco el dolor de articulaciones. Si en 2 meses no notas nada, déjala.");
@@ -583,7 +621,7 @@ function evaluate(a){
 
   /* Digestión y colesterol */
   if(H("issues","estren")) add("psyllium","take","Para ir mejor al baño es lo que mejor funciona. Con mucha agua.");
-  if(H("issues","digest")) add("probioticos","opt","Algunas cepas ayudan con la hinchazón. Pruébalo 4 semanas: si no notas nada, déjalo."+(a.prot!=="si"?" Si la proteína de leche te hincha, usa whey isolate o vegetal.":""));
+  if(H("issues","digest")) add("probioticos","opt",a.milk==="si"?"Antes, prueba a quitar la leche o pasarte a sin lactosa: suele ser la causa. Si después sigues hinchado, prueba un probiótico 4 semanas. Si tomas proteína, que sea whey isolate o vegetal.":a.milk==="nose"?"Prueba 2 semanas sin leche (o sin lactosa) para ver si es eso. Si sigues hinchado, prueba un probiótico 4 semanas.":"Algunas cepas ayudan con la hinchazón. Pruébalo 4 semanas: si no notas nada, déjalo.");
   if(H("issues","colesterol")){
     add("psyllium","opt","Baja un poco el colesterol LDL. Además, mejora tu digestión.");
     if(!preg) add("esteroles","opt","Bajan el colesterol LDL un 7–10 %. Coméntalo con tu médico si ya tomas medicación.");
@@ -600,7 +638,7 @@ function evaluate(a){
   /* Sueño, estrés y foco */
   if(!preg&&!minor){
     if(a.sleep==="turnos") add("melatonina","opt","Con turnos o jet lag es donde mejor funciona. Tómala a la hora a la que quieres dormir.");
-    else if(a.sleep==="dormirse") add("melatonina","opt","Te ayuda a dormirte un poco antes. Pero primero: horario fijo, nada de café por la tarde y fuera pantallas 1 h antes.");
+    else if(a.sleep==="dormirse") add("melatonina","opt",(a.late==="si"?"Antes de nada, deja la cafeína a partir de las 4 de la tarde: seguramente es lo que más te cuesta el sueño. Si aun así no te duermes, esto ayuda un poco.":"Te ayuda a dormirte un poco antes. Pero primero: horario fijo y fuera pantallas 1 h antes."));
     if(a.sleep==="despierto"||a.sleep==="dormirse") add("glicina","opt","Puede mejorar un poco la calidad del sueño. Es barata y segura.");
   }
   if(sleepBad) add("magnesio","skip","Para dormir apenas funciona si no te falta.");
@@ -632,12 +670,13 @@ function alertsFor(a){
   if(H("period","embarazo")) L.push(`<b>Embarazo o lactancia.</b> Antes de tomar cualquier cosa, pregunta a tu ginecólogo o matrona.`);
   if(H("period","irregular")||H("periodMenor","irregular")) L.push(`<b>Regla irregular o retirada.</b> Si entrenas mucho y comes poco, el cuerpo «apaga» la regla para ahorrar energía. Es una señal de alarma para tus huesos y tus hormonas: come más y ve al ginecólogo. Ningún suplemento lo arregla.`);
   if(H("period","dolor")||H("periodMenor","dolor")) L.push(`<b>Regla muy dolorosa.</b> Si el dolor te impide hacer vida normal, consulta al ginecólogo: puede ser endometriosis.`);
-  if(H("health","med")) L.push(`<b>Tomas medicación.</b> Enséñale este plan a tu médico o farmacéutico antes de tomar nada. Algunos suplementos interactúan con medicamentos.`);
+  if(H("health","med")) L.push(`<b>Tomas medicación.</b> Enséñale esta lista a tu médico o farmacéutico antes de tomar nada. Algunos suplementos interactúan con medicamentos.`);
   if(H("health","renal")||H("health","higado")) L.push(`<b>Problema de riñón o hígado.</b> Cualquier suplemento, primero con tu médico.`);
   if(H("health","tiroides")) L.push(`<b>Tiroides.</b> Separa 4 horas el calcio, el hierro y la soja de tu medicación. Nada de yodo, algas ni ashwagandha sin tu endocrino. La biotina altera tus analíticas.`);
   if(H("health","diabetes")) L.push(`<b>Diabetes.</b> Si usas insulina o pastillas, la cafeína y los hidratos durante el ejercicio cambian tu glucosa. Ajusta con tu endocrino.`);
   if(H("health","antidoping")) L.push(`<b>Controles antidopaje.</b> Compra solo productos con sello Informed Sport o NSF Certified for Sport. Muchos suplementos llevan sustancias prohibidas que no salen en la etiqueta, y el positivo es tuyo.`);
   if(H("issues","fatiga")||a.energy==="nada") L.push(`<b>Cansancio constante.</b> Pide una analítica completa (hierro, ferritina, vitamina D, B12 y tiroides). El cansancio que no se va no se arregla con un pre-entreno.`);
+  if(a.late==="si") L.push(`<b>Cafeína por la tarde.</b> La cafeína sigue en tu cuerpo 6–8 horas. Si te cuesta dormir, corta el café, el té y las bebidas energéticas a partir de las 4 de la tarde.`);
   if(a.sleep==="poco") L.push(`<b>Duermes menos de 6 horas.</b> No hay suplemento que compense eso. Dormir más es lo que más va a mejorar tu físico y tu energía.`);
   return L;
 }
@@ -653,7 +692,7 @@ const BASE = {
 function baseFor(a){
   const L=[...BASE[a.goal]], H=(k,v)=>Array.isArray(a[k])&&a[k].includes(v);
   if(a.energy==="cuesta"||a.energy==="nada") L.push("Come algo 1–3 h antes de entrenar: un plátano con yogur o una tostada");
-  if(Array.isArray(a.injury)&&a.injury.length&&!H("injury","nada")) L.push("Para lesionarte menos: sube la carga poco a poco, calienta bien y descansa. Ningún suplemento previene lesiones por sí solo");
+  if(Array.isArray(a.injury)&&a.injury.length&&!H("injury","nada")) L.push(a.rehab==="no"?"Para lesionarte menos: haz ejercicios de fuerza para esa zona (mejor con un fisio). Es lo que más previene recaídas, mucho más que cualquier suplemento":"Para lesionarte menos: sube la carga poco a poco, calienta bien y descansa. Ningún suplemento previene lesiones por sí solo");
   return L;
 }
 
@@ -662,7 +701,7 @@ function baseFor(a){
    ========================================================= */
 const app=document.getElementById("app");
 const esc=s=>String(s??"").replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));
-const fresh=()=>({goal:null,w:70,days:null,cond:[],recov:[],injury:[],period:[],periodMenor:[],issues:[],health:[]});
+const fresh=()=>({goal:null,w:70,days:null,cond:[],recov:[],injury:[],why:[],period:[],periodMenor:[],issues:[],health:[],current:[]});
 let A=fresh(), cur="goal", libG="all", libQ="", libFrom="cover";
 const show=html=>{app.innerHTML=html;window.scrollTo(0,0);};
 const visible=()=>Q.filter(q=>!q.when||q.when(A));
@@ -674,7 +713,7 @@ function cover(){
     <h1>¿Qué <span class="hl">suplementos</span> necesitas?</h1>
     <p class="sub">¿Y si no necesitas ninguno y estás perdiendo el dinero?</p>
     <p class="lead"><b>Te lo explico fácil:</b> responde unas preguntitas rápidas sobre ti, tu entrenamiento, tu alimentación y tu salud, y te digo qué tomar y cuándo tomarlo. Basado en estudios.</p>
-    <div class="facts"><span>3 minutos</span><span>Gratis</span><span>Sin registrarte</span><span>Para cualquier objetivo</span></div>
+    <div class="facts"><span>Tardas menos de 3 minutos</span></div>
     <button class="cta" id="go">¡Vamos al lío!</button>
     <div class="how">
       <div><i>✓</i><span>Lo que te sirve <b>a ti</b>, con tu dosis calculada</span></div>
@@ -701,16 +740,16 @@ function quiz(){
   } else {
     const sel=v=>isMulti?(A[q.id]||[]).includes(v):A[q.id]===v;
     body=`<div class="opts ${isMulti?"multi":""}">`+q.opts.map(([v,l,s])=>`<button type="button" class="opt" data-v="${v}" aria-pressed="${sel(v)}"><span>${esc(l)}${s?`<small>${esc(s)}</small>`:""}</span><span class="tick">${sel(v)?"✓":""}</span></button>`).join("")+`</div>`
-      +(isMulti?`<button class="cta" id="next" ${(A[q.id]||[]).length?"":"disabled"}>${i===total-1?"Ver mi plan":"Siguiente"}</button>`:"");
+      +(isMulti?`<button class="cta" id="next" ${(A[q.id]||[]).length?"":"disabled"}>${i===total-1?"Ver mis resultados":"Siguiente"}</button>`:"");
   }
   const greet = i===0
-    ? `<div class="greet"><img src="${IMG.face}" alt="Álvaro Zamudio"><div><b>¡Vamos al lío, señor@!</b><span>Contesta con sinceridad y te hago tu plan.</span></div></div>`
-    : (q.sec!==V[i-1].sec?`<div class="greet"><img src="${IMG.face}" alt="Álvaro Zamudio"><div><b>${q.sec==="Para terminar"?`¡Última, ${sr()}!`:`Vamos con ${q.sec.toLowerCase()}, ${sr()}`}</b><span>${q.sec==="Tu entreno"?"Para saber qué te ayuda a rendir y recuperar.":q.sec==="Tu alimentación"?"Para ver qué te puede faltar.":q.sec==="Tu salud"?"Esto es lo que más cambia tu plan.":"Y te enseño tu plan."}</span></div></div>`:"");
+    ? `<div class="greet"><img src="${IMG.face}" alt="Álvaro Zamudio"><div><b>¡Vamos al lío, señor@!</b><span>Contesta con sinceridad para saber los suplementos que necesitas y los que no.</span></div></div>`
+    : (q.sec!==V[i-1].sec?`<div class="greet"><img src="${IMG.face}" alt="Álvaro Zamudio"><div><b>${q.sec==="Para terminar"?`¡Última, ${sr()}!`:`Vamos con ${q.sec.toLowerCase()}, ${sr()}`}</b><span>${q.sec==="Tu entreno"?"Para saber qué te ayuda a rendir y recuperar.":q.sec==="Tu alimentación"?"Para ver qué te puede faltar.":q.sec==="Tu salud"?"Esto es lo que más cambia lo que te conviene.":"Y te digo qué necesitas y qué no."}</span></div></div>`:"");
   show(`<div class="screen q">
     <div class="bar"><button class="back" id="back">← Atrás</button><div class="prog"><div style="width:${(i+1)/total*100}%"></div></div><span class="count">${i+1}/${total}</span></div>
     ${greet}
     <div class="secname">${esc(q.sec)}</div>
-    <h2>${esc(q.q)}</h2>${q.hint?`<p class="hint">${esc(q.hint)}</p>`:""}
+    <h2>${esc(typeof q.q==="function"?q.q(A):q.q)}</h2>${q.hint?`<p class="hint">${esc(q.hint)}</p>`:""}
     ${body}
   </div>`);
   document.getElementById("back").onclick=()=>{ if(i===0) cover(); else {cur=V[i-1].id;quiz();} };
@@ -742,6 +781,27 @@ function quiz(){
   }
 }
 
+/* Veredicto sobre lo que ya toma */
+const CURN = Object.fromEntries(Q.find(q=>q.id==="current").opts.map(([v,l])=>[v,l]));
+function currentVerdict(a,R){
+  const st=id=>R.find(x=>x.id===id);
+  return (a.current||[]).filter(v=>v!=="nada").map(v=>{
+    if(v==="otros") return {n:CURN[v],k:"meh",t:"Búscalos en «Ver todos los suplementos» para saber si funcionan."};
+    let r = v==="preentreno" ? (st("preok")||st("cafeina")) : st(v);
+    const s=BY[v==="preentreno"?"preentreno":v];
+    if((v==="preentreno"||v==="cafeina")&&(a.coffee==="3+")) return {n:CURN[v],k:"no",t:"Con los cafés que ya tomas tienes cafeína de sobra. Déjalo, o cambia uno de tus cafés por él antes de entrenar."};
+    if(v==="preentreno"&&r&&(r.s==="take"||r.s==="opt")) return {n:CURN[v],k:r.s==="take"?"si":"meh",t:"Te puede servir, pero solo si tiene todas las dosis a la vista y la cafeína que te indico. Si es de «mezcla patentada», cámbialo."};
+    if(r&&r.s==="take") return {n:CURN[v],k:"si",t:"Sigue con él: te sirve."};
+    if(r&&r.s==="test") return {n:CURN[v],k:"test",t:"Solo si la analítica dice que te falta. Si no te la has hecho, pídela antes de seguir."};
+    if(r&&r.s==="opt") return {n:CURN[v],k:"meh",t:"Puedes seguir, pero te ayuda poco."};
+    if(r&&r.s==="avoid") return {n:CURN[v],k:"no",t:"Déjalo o consúltalo con tu médico. "+r.why};
+    if(r&&r.s==="skip") return {n:CURN[v],k:"no",t:"Puedes dejarlo. "+r.why};
+    if(s&&(s.g==="D"||s.g==="X")) return {n:CURN[v],k:"no",t:"Déjalo. "+s.para};
+    return {n:CURN[v],k:"no",t:"En tu caso no te aporta nada: puedes dejarlo y ahorrarte el dinero."};
+  });
+}
+const VK={si:["Sigue","var(--yellow)","var(--on-yellow)"],test:["Analítica","var(--fg)","var(--on-yellow)"],meh:["Ayuda poco","var(--surface2)","var(--muted)"],no:["Déjalo","var(--red)","var(--on-yellow)"]};
+
 function card(x,kind){
   const s=BY[x.id], dose=x.dose||s.como;
   return `<article class="card ${kind}">
@@ -755,15 +815,18 @@ function card(x,kind){
 
 function result(){
   const R=evaluate(A), by=k=>R.filter(x=>x.s===k), alerts=alertsFor(A);
-  const take=by("take"), test=by("test"), opt=by("opt"), avoid=by("avoid"), skips=by("skip");
+  const take=by("take"), test=by("test"), opt=by("opt"), avoid=by("avoid"), cur=currentVerdict(A,R);
+  const curIds=new Set((A.current||[]).map(v=>v==="preentreno"?"preentreno":v));
+  const skips=by("skip").filter(x=>!curIds.has(x.id));
   const sec=(k,title,sub,col,items)=>items.length?`<section class="sec"><h2><span class="sw" style="background:${col}"></span>${title}</h2>${sub?`<p>${sub}</p>`:""}${items.map(x=>card(x,k)).join("")}</section>`:"";
   const optHidden = A.budget==="min" && opt.length;
   show(`<div class="screen">
     <div class="brand"><img src="${IMG.logo}" alt="Logo de Zamudio Coach"><button class="back" id="redo">Repetir test</button></div>
-    <div class="greet"><img src="${IMG.face}" alt="Álvaro Zamudio"><div><b>Aquí tienes tu plan, ${sr()}</b><span>Hecho con tus respuestas. Empieza por lo amarillo.</span></div></div>
-    <div class="res-head"><h1>Tu plan de <span class="hl">suplementos</span></h1><p>Objetivo: <b style="color:var(--fg)">${GOALS[A.goal]}</b> · ${A.w} kg</p></div>
+    <div class="greet"><img src="${IMG.face}" alt="Álvaro Zamudio"><div><b>Aquí lo tienes, ${sr()}</b><span>Según tus respuestas. Empieza por lo amarillo.</span></div></div>
+    <div class="res-head"><h1>Lo que necesitas <span class="hl">y lo que no</span></h1><p>Objetivo: <b style="color:var(--fg)">${GOALS[A.goal]}</b> · ${A.w} kg</p></div>
     <div class="summary"><div><b>${take.length}</b><span>Tómalo</span></div><div><b>${test.length}</b><span>Analítica</span></div><div><b>${opt.length}</b><span>Opcional</span></div></div>
     ${alerts.map(a=>`<div class="alert">${a}</div>`).join("")}
+    ${cur.length?`<section class="sec"><h2><span class="sw" style="background:var(--fg)"></span>Lo que ya tomas</h2><p>Lo que te sirve y lo que no de lo que tomas ahora.</p><div class="nope cur">${cur.map(c=>`<div><b>${esc(c.n)} <i style="background:${VK[c.k][1]};color:${VK[c.k][2]}">${VK[c.k][0]}</i></b><span>${esc(c.t)}</span></div>`).join("")}</div></section>`:""}
     ${sec("take","Tómalo","Funciona y encaja contigo.","var(--yellow)",take)}
     ${!take.length?`<div class="card"><p>En tu caso <b>no necesitas ningún suplemento</b> para empezar. Céntrate en lo que de verdad importa (más abajo).</p></div>`:""}
     ${sec("test","Antes, analítica","Puede que te falte. Pide esto a tu médico y compruébalo antes de gastar dinero.","var(--fg)",test)}
