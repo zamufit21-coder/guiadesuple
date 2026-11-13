@@ -598,7 +598,7 @@ function evaluate(a){
   if(H("period","spm")) add("calcio","opt","Para el síndrome premenstrual: 1.000–1.200 mg al día de calcio redujo los síntomas en un ensayo grande. Primero intenta llegar con lácteos.");
   if(H("period","sop")) add("inositol","opt","Con SOP puede ayudar a regular la regla. Háblalo con tu ginecólogo.");
   if(meno){ add("vitd","test","En la menopausia el hueso se pierde más rápido. Pide vitamina D en tu analítica."); add("calcio",a.dairy==="si"?"skip":"test",a.dairy==="si"?"Con tus lácteos ya llegas.":"En la menopausia necesitas llegar a 1.000–1.200 mg al día. Si no llegas con lácteos, suplementa."); }
-  if(preg){ add("folico","take","Imprescindible. Tu ginecólogo o matrona completará la pauta."); add("yodo","take","En embarazo y lactancia se recomienda en España un suplemento de yodo. Confírmalo con tu ginecólogo."); add("hierro","test","En el embarazo es muy común que falte. Tu ginecólogo lo vigilará en las analíticas."); }
+  if(preg){ add("folico","take","Imprescindible. Tu ginecólogo o matrona completará la pauta."); add("yodo",thy?"avoid":"take",thy?"En el embarazo suele recomendarse yodo, pero con tu problema de tiroides lo decide tu endocrino. No lo tomes por tu cuenta.":"En embarazo y lactancia se recomienda en España un suplemento de yodo. Confírmalo con tu ginecólogo."); add("hierro","test","En el embarazo es muy común que falte. Tu ginecólogo lo vigilará en las analíticas."); }
 
   /* Analíticas por riesgo */
   if(a.sun==="no"||mayor) add("vitd","test",(a.sun==="no"?"Te da poco el sol":"Con la edad se fabrica menos")+", así que te puede faltar. Pide «vitamina D» en tu próxima analítica. Si sale baja, tómala.");
@@ -815,7 +815,7 @@ function card(x,kind){
 
 function result(){
   const R=evaluate(A), by=k=>R.filter(x=>x.s===k), alerts=alertsFor(A);
-  const take=by("take"), test=by("test"), opt=by("opt"), avoid=by("avoid"), cur=currentVerdict(A,R);
+  const take=by("take"), test=by("test"), opt=by("opt"), avoid=by("avoid"), mine=currentVerdict(A,R);
   const curIds=new Set((A.current||[]).map(v=>v==="preentreno"?"preentreno":v));
   const skips=by("skip").filter(x=>!curIds.has(x.id));
   const sec=(k,title,sub,col,items)=>items.length?`<section class="sec"><h2><span class="sw" style="background:${col}"></span>${title}</h2>${sub?`<p>${sub}</p>`:""}${items.map(x=>card(x,k)).join("")}</section>`:"";
@@ -826,7 +826,7 @@ function result(){
     <div class="res-head"><h1>Lo que necesitas <span class="hl">y lo que no</span></h1><p>Objetivo: <b style="color:var(--fg)">${GOALS[A.goal]}</b> · ${A.w} kg</p></div>
     <div class="summary"><div><b>${take.length}</b><span>Tómalo</span></div><div><b>${test.length}</b><span>Analítica</span></div><div><b>${opt.length}</b><span>Opcional</span></div></div>
     ${alerts.map(a=>`<div class="alert">${a}</div>`).join("")}
-    ${cur.length?`<section class="sec"><h2><span class="sw" style="background:var(--fg)"></span>Lo que ya tomas</h2><p>Lo que te sirve y lo que no de lo que tomas ahora.</p><div class="nope cur">${cur.map(c=>`<div><b>${esc(c.n)} <i style="background:${VK[c.k][1]};color:${VK[c.k][2]}">${VK[c.k][0]}</i></b><span>${esc(c.t)}</span></div>`).join("")}</div></section>`:""}
+    ${mine.length?`<section class="sec"><h2><span class="sw" style="background:var(--fg)"></span>Lo que ya tomas</h2><p>Lo que te sirve y lo que no de lo que tomas ahora.</p><div class="nope cur">${mine.map(c=>`<div><b>${esc(c.n)} <i style="background:${VK[c.k][1]};color:${VK[c.k][2]}">${VK[c.k][0]}</i></b><span>${esc(c.t)}</span></div>`).join("")}</div></section>`:""}
     ${sec("take","Tómalo","Funciona y encaja contigo.","var(--yellow)",take)}
     ${!take.length?`<div class="card"><p>En tu caso <b>no necesitas ningún suplemento</b> para empezar. Céntrate en lo que de verdad importa (más abajo).</p></div>`:""}
     ${sec("test","Antes, analítica","Puede que te falte. Pide esto a tu médico y compruébalo antes de gastar dinero.","var(--fg)",test)}
